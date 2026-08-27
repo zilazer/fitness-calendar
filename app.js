@@ -101,6 +101,8 @@ function bindCalendarControls(){
   $('todayBtn').onclick=()=>{currentMonth=new Date();currentMonth.setDate(1);renderCalendar();};
   $('newWorkoutBtn').onclick=()=>openWorkoutDialog();
   $('exportIcsBtn').onclick=exportIcs;
+  $('closeSyncGuide').onclick=()=>$('syncGuideDialog').close();
+  $('finishSyncGuide').onclick=()=>$('syncGuideDialog').close();
   $('closeDayDialog').onclick=()=>$('dayDialog').close();
 }
 
@@ -233,7 +235,7 @@ function renderSourceLog(){const host=$('sourceLog');host.innerHTML=state.source
 
 function exportIcs(){
   const events=state.workouts.map(w=>{const start=(w.start||'09:00').replace(':','')+'00',startDate=w.date.replaceAll('-',''),end=new Date(`${w.date}T${w.start||'09:00'}:00`);end.setMinutes(end.getMinutes()+(w.duration||60));const endDate=`${end.getFullYear()}${pad(end.getMonth()+1)}${pad(end.getDate())}T${pad(end.getHours())}${pad(end.getMinutes())}00`;const title=`${w.status==='planned'?'计划｜':''}${w.name}${w.duration?`｜${w.duration}分钟`:''}`;const detail=[w.location&&`地点：${w.location}`,w.calories&&`活动消耗：${w.calories} kcal`,w.exercises?.length&&`动作：${w.exercises.map(x=>x.name).join('、')}`,`数据来源：${sourceLabel(w)}`].filter(Boolean).join('\\n');return ['BEGIN:VEVENT',`UID:${w.id}@fitness-calendar.local`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}`,`DTSTART:${startDate}T${start}`,`DTEND:${endDate}`,`SUMMARY:${icsEsc(title)}`,`DESCRIPTION:${icsEsc(detail)}`,w.location?`LOCATION:${icsEsc(w.location)}`:'','END:VEVENT'].filter(Boolean).join('\r\n');});
-  const content=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Fitness Calendar//ZH-CN','CALSCALE:GREGORIAN','X-WR-CALNAME:健身',...events,'END:VCALENDAR'].join('\r\n');const url=URL.createObjectURL(new Blob([content],{type:'text/calendar;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='健身日历.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('syncState').textContent='已导出';toast('已生成 Apple 日历文件');
+  const content=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Fitness Calendar//ZH-CN','CALSCALE:GREGORIAN','X-WR-CALNAME:健身',...events,'END:VCALENDAR'].join('\r\n');const url=URL.createObjectURL(new Blob([content],{type:'text/calendar;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='健身日历.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('syncState').textContent='已建立';$('syncGuideDialog').showModal();toast('日历文件已生成');
 }
 function icsEsc(v){return String(v).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
 

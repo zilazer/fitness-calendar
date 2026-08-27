@@ -24,13 +24,13 @@
 
       <div class="sidebar-section">
         <p class="eyebrow">日历</p>
-        <div class="calendar-source"><i></i><span>iCloud · 健身</span><b id="syncState">待配置</b></div>
+        <div class="calendar-source"><i></i><span>iCloud · 健身</span><b id="syncState">已建立</b></div>
       </div>
 
       <div class="sidebar-footer">
         <div class="privacy-note"><span>◉</span><p><strong>本地数据</strong><br>训练细节保存在这台设备</p></div>
         <p class="asset-credit">动作图：<a href="https://bryllim.com" target="_blank" rel="noreferrer">Bryl Lim</a> · CC BY-SA 4.0</p>
-        <button class="secondary full" id="exportIcsBtn">导出 Apple 日历文件</button>
+        <button class="secondary full" id="exportIcsBtn">导出到“健身”日历</button>
       </div>
     </aside>
 
@@ -137,6 +137,17 @@
       <label class="notes-field"><span>模板名称</span><input id="templateName" required placeholder="例如：上肢 A"></label>
       <div class="modal-actions"><button value="cancel" class="secondary">取消</button><button type="submit" value="default" class="primary">创建并添加动作</button></div>
     </form>
+  </dialog>
+
+  <dialog id="syncGuideDialog" class="modal day-modal">
+    <div class="modal-head"><div><p class="eyebrow">iCloud 日历</p><h2>日历文件已生成</h2></div><button class="close-btn" id="closeSyncGuide" aria-label="关闭">×</button></div>
+    <div class="sync-steps">
+      <p><b>1</b><span>打开下载的“健身日历.ics”。</span></p>
+      <p><b>2</b><span>在 Calendar 的导入窗口中，目标日历选择 <strong>健身</strong>。</span></p>
+      <p><b>3</b><span>完成后会通过 iCloud 同步到你的其他 Apple 设备。</span></p>
+    </div>
+    <p class="sync-boundary">当前是安全的人工确认导入，不是无需授权的后台自动写入。</p>
+    <div class="modal-actions"><button class="primary" id="finishSyncGuide">知道了</button></div>
   </dialog>
 
   <div id="toast" class="toast" role="status"></div>
