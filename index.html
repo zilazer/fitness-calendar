@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>健身日历</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">健</span>
+        <div><strong>健身日历</strong><small>训练 · 恢复 · 计划</small></div>
+      </div>
+
+      <nav class="nav" aria-label="主要导航">
+        <button class="nav-item active" data-view="calendar"><span>▦</span>月历</button>
+        <button class="nav-item" data-view="today"><span>◎</span>今日训练</button>
+        <button class="nav-item" data-view="templates"><span>☷</span>力量模板</button>
+        <button class="nav-item" data-view="imports"><span>↓</span>数据导入</button>
+      </nav>
+
+      <div class="sidebar-section">
+        <p class="eyebrow">日历</p>
+        <div class="calendar-source"><i></i><span>iCloud · 健身</span><b id="syncState">待配置</b></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="privacy-note"><span>◉</span><p><strong>本地数据</strong><br>训练细节保存在这台设备</p></div>
+        <p class="asset-credit">动作图：<a href="https://bryllim.com" target="_blank" rel="noreferrer">Bryl Lim</a> · CC BY-SA 4.0</p>
+        <button class="secondary full" id="exportIcsBtn">导出 Apple 日历文件</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="viewEyebrow">训练日志</p>
+          <h1 id="viewTitle">2026 年8月</h1>
+        </div>
+        <div class="top-actions">
+          <div class="month-controls" id="monthControls">
+            <button class="icon-btn" id="prevMonth" aria-label="上一月">‹</button>
+            <button class="secondary" id="todayBtn">今天</button>
+            <button class="icon-btn" id="nextMonth" aria-label="下一月">›</button>
+          </div>
+          <button class="primary" id="newWorkoutBtn"><span>+</span>记录训练</button>
+        </div>
+      </header>
+
+      <section id="calendarView" class="view active">
+        <div class="summary-grid">
+          <article class="summary-card accent"><small>本月训练</small><strong id="monthWorkoutCount">0</strong><span>次</span></article>
+          <article class="summary-card"><small>训练时间</small><strong id="monthMinutes">0</strong><span>分钟</span></article>
+          <article class="summary-card"><small>活动消耗</small><strong id="monthCalories">0</strong><span>kcal</span></article>
+          <article class="summary-card sleep"><small>平均睡眠</small><strong id="monthSleep">--</strong><span>小时</span></article>
+        </div>
+
+        <div class="calendar-card">
+          <div class="weekdays"><span>周日</span><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span></div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+      </section>
+
+      <section id="todayView" class="view">
+        <div class="hero-card">
+          <div><p class="eyebrow">今天</p><h2 id="todayDateLabel"></h2><p id="todayRecovery">尚无今日睡眠数据</p></div>
+          <button class="primary" id="startFromTemplateBtn">从力量模板开始</button>
+        </div>
+        <div id="todaySessions" class="session-list"></div>
+      </section>
+
+      <section id="templatesView" class="view">
+        <div class="section-heading"><div><p class="eyebrow">力量训练</p><h2>我的训练模板</h2><p>模板只定义计划；今天的修改不会自动覆盖模板。</p></div><button class="primary" id="newTemplateBtn">+新建模板</button></div>
+        <div id="templateGrid" class="template-grid"></div>
+      </section>
+
+      <section id="importsView" class="view">
+        <div class="section-heading"><div><p class="eyebrow">数据中心</p><h2>即时补录与历史对账</h2><p>截图立即补录，Apple Health XML 定期补齐并作为客观指标冲突时的最终值。</p></div></div>
+        <div class="import-grid">
+          <article class="import-card">
+            <div class="import-icon screenshot">▣</div><div><h3>训练截图</h3><p>支持 Apple Fitness/健康截图。识别后先确认，再写入为“待 XML 补齐”记录。</p></div>
+            <label class="drop-zone" id="screenshotDrop"><input type="file" id="screenshotInput" accept="image/*"><strong>拖入截图</strong><span>或点击选择图片</span></label>
+            <div id="screenshotResult" class="import-result hidden"></div>
+          </article>
+          <article class="import-card">
+            <div class="import-icon xml">XML</div><div><h3>Apple Health XML</h3><p>流式读取训练和睡眠，处理全程留在本机浏览器中。手工动作和组数不会被覆盖。</p></div>
+            <label class="drop-zone" id="xmlDrop"><input type="file" id="xmlInput" accept=".xml,text/xml"><strong>选择“导出.xml”</strong><span>支持大文件，请保持页面打开</span></label>
+            <div class="progress hidden" id="xmlProgress"><div><i id="xmlProgressBar"></i></div><span id="xmlProgressText">准备解析…</span></div>
+            <div id="xmlResult" class="import-result hidden"></div>
+          </article>
+        </div>
+        <div class="source-log-card"><div class="section-heading compact"><div><p class="eyebrow">审计记录</p><h2>数据来源</h2></div></div><div id="sourceLog" class="source-log"></div></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="workoutDialog" class="modal">
+    <form method="dialog" id="workoutForm">
+      <div class="modal-head"><div><p class="eyebrow">训练记录</p><h2 id="workoutDialogTitle">新增训练</h2></div><button class="close-btn" value="cancel" aria-label="关闭">×</button></div>
+      <input type="hidden" id="workoutId">
+      <div class="form-grid">
+        <label><span>状态</span><select id="workoutStatus"><option value="planned">计划</option><option value="completed">已完成</option></select></label>
+        <label><span>类别</span><select id="workoutCategory"><option value="strength">力量训练</option><option value="cardio">有氧训练</option><option value="mobility">拉伸恢复</option></select></label>
+        <label><span>训练名称</span><input id="workoutName" required placeholder="例如：上肢 A"></label>
+        <label><span>地点</span><input id="workoutLocation" placeholder="家 / 健身房 / 户外"></label>
+        <label><span>日期</span><input id="workoutDate" type="date" required></label>
+        <label><span>开始时间</span><input id="workoutStart" type="time"></label>
+        <label><span>时长（分钟）</span><input id="workoutDuration" type="number" min="0" step="1"></label>
+        <label><span>活动消耗（kcal）</span><input id="workoutCalories" type="number" min="0" step="1"></label>
+      </div>
+      <div id="strengthEditor" class="strength-editor">
+        <div class="subsection-head"><div><h3>力量动作</h3><p>从动作库添加，再记录每组重量和次数。</p></div><button type="button" class="secondary" id="addExerciseBtn">+添加动作</button></div>
+        <div id="exerciseEditorList" class="exercise-editor-list"></div>
+      </div>
+      <label class="notes-field"><span>备注</span><textarea id="workoutNotes" rows="3" placeholder="训练感受、RPE或临时调整"></textarea></label>
+      <div class="modal-actions"><button value="cancel" class="secondary">取消</button><button type="submit" value="default" class="primary">保存训练</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="exerciseDialog" class="modal exercise-modal">
+    <div class="modal-head"><div><p class="eyebrow">302 个动作</p><h2>选择力量动作</h2></div><button class="close-btn" id="closeExerciseDialog" aria-label="关闭">×</button></div>
+    <div class="exercise-filters"><input id="exerciseSearch" placeholder="搜索动作、肌群或器械"><select id="muscleFilter"><option value="">全部肌群</option></select><select id="equipmentFilter"><option value="">全部器械</option></select></div>
+    <div id="exerciseLibrary" class="exercise-library"></div>
+  </dialog>
+
+  <dialog id="dayDialog" class="modal day-modal">
+    <div class="modal-head"><div><p class="eyebrow">每日详情</p><h2 id="dayDialogTitle"></h2></div><button class="close-btn" id="closeDayDialog" aria-label="关闭">×</button></div>
+    <div id="dayDialogContent"></div>
+  </dialog>
+
+  <dialog id="templateDialog" class="modal day-modal">
+    <form method="dialog" id="templateForm">
+      <div class="modal-head"><div><p class="eyebrow">力量计划</p><h2>新建训练模板</h2></div><button class="close-btn" value="cancel" aria-label="关闭">×</button></div>
+      <label class="notes-field"><span>模板名称</span><input id="templateName" required placeholder="例如：上肢 A"></label>
+      <div class="modal-actions"><button value="cancel" class="secondary">取消</button><button type="submit" value="default" class="primary">创建并添加动作</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
